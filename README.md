@@ -1,0 +1,2 @@
+# -TexasBoja
+Wysylanie sekwencyjnego sygnalu
