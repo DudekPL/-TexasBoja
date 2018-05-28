@@ -77,8 +77,8 @@ inline void processDebouncing()
         debouncingActive = 0;
     }
     else{
-     debouncingActive++;
-     debouncingPassive = 0;
+    	debouncingActive++;
+    	debouncingPassive = 0;
     }
 }
 
@@ -100,42 +100,42 @@ inline void enableLEDOff()
 
 
 int main(void) {
- init();
- __bis_SR_register(LPM3_bits | GIE);  // bo robimy na ACLK
+	init();
+	__bis_SR_register(LPM3_bits | GIE);  // bo robimy na ACLK
     while(1)
     {
         __disable_interrupt();
         if(flag==LED_DISPLAY)
         {
-         flag=0;
-         if (space){
-          TA0CCR1 = SHORT_BREAK;
-          LED_OUT &= ~LED;
-         }
-         else {
-          int temp = nextBit();
-          if(temp == 0 && enable) space = !space;
-          if(temp==0 && (!enable)){ //właśnie wyświetliliśmy ostatni znak a użytkownik nie chce więcej
-     TA0CTL |= MC_0;
-          }
-         }
-         space = !space;
+        	flag=0;
+        	if (space){
+        		TA0CCR1 = SHORT_BREAK;
+        		LED_OUT &= ~LED;
+        	}
+        	else {
+        		int temp = nextBit();
+        		if(temp == 0 && enable) space = !space;
+        		if(temp==0 && (!enable)){ //właśnie wyświetliliśmy ostatni znak a użytkownik nie chce więcej
+					TA0CTL |= MC_0;
+        		}
+        	}
+        	space = !space;
         }
 
         if(flag==CONTROL_BUTTON_PRESSED)
         {
 
-         flag=0;
+        	flag=0;
             startDebouncing();
         }
 
         if(flag==DEBOUNCING_PROCEED)
         {
-         flag=0;
+        	flag=0;
             processDebouncing();
             if(debouncingActive == DEBOUNCING_MAX_EVENT_COUNT) //byl wcisniety
             {
-             BTN_IE  |= BTN;
+            	BTN_IE  |= BTN;
                 stopDebouncing();
                 enable = !enable;
                 LED_OUT ^= ENABLE_LED;
@@ -143,14 +143,14 @@ int main(void) {
             }
             if(debouncingPassive == DEBOUNCING_MAX_EVENT_COUNT) // nie byl wcisniety
             {
-             BTN_IE  |= BTN;
-             stopDebouncing();
+            	BTN_IE  |= BTN;
+            	stopDebouncing();
             }
             BTN_IFG &= ~BTN;
         }
         if(flag==CONTROL_BUTTON_CHANGED)
         {
-         flag =0;
+        	flag =0;
             if(enable)
             {
                 enableLEDOff();
@@ -160,7 +160,7 @@ int main(void) {
             {
                 enableLEDOn();
                 enable = 1;
-             }
+            	}
         }
         if(flag==0)
             __bis_SR_register(LPM3_bits | GIE);
@@ -169,58 +169,55 @@ int main(void) {
 
 int nextBit()
 {
- char n = sequence[iterator];
- iterator++;
- switch(n)
-     {
-      case '-':
-      TA0CCR1 = LINE_TIME;
-      return 1;
-      break;
+	char n = sequence[iterator];
+	iterator++;
+	switch(n)
+		   {
+			   case '-':
+			   TA0CCR1 = LINE_TIME;
+			   return 1;
+			   break;
 
-      case '.':
-      TA0CCR1 = DOT_TIME;
-      return 1;
-      break;
+			   case '.':
+			   TA0CCR1 = DOT_TIME;
+			   return 1;
+			   break;
 
-      case '#':
-      iterator = 0;
-      TA0CCR1 = BREAK_TIME;
-      break;
-     }
+			   case '#':
+			   iterator = 0;
+			   TA0CCR1 = BREAK_TIME;
+			   break;
+		   }
     return 0;
 
 }
 int set_timer(int i){
- char n = sequence[i];
-  switch(n)
-                {
-                    case '-':
-                 TA0CCR1 = LINE_TIME;
-                 return 1;
-                    break;
+	char n = sequence[i];
+	 switch(n)
+	               {
+	               	   case '-':
+	            	   TA0CCR1 = LINE_TIME;
+	            	   return 1;
+	                   break;
 
-                    case '.':
-                    TA0CCR1 = DOT_TIME;
-                    return 1;
-                    break;
+	                   case '.':
+	                   TA0CCR1 = DOT_TIME;
+	                   return 1;
+	                   break;
 
-                    case '#':
-                    iterator = 0;
-                    TA0CCR1 = BREAK_TIME;
-                    return 0;
-                    break;
-                }
+	                   case '#':
+	                   iterator = 0;
+	                   TA0CCR1 = BREAK_TIME;
+	                   return 0;
+	                   break;
+	               }
 }
 
 #pragma vector=TIMERA1_VECTOR
 __interrupt void LED_timer (void)
-{ONTROL_BUTTON_PRESSED;
- BTN_IE &= ~BTN;
- BTN_IFG &= ~BTN;
-  _BIC_SR_IRQ(LPM3_bits); // Budzimy sie
- flag = LED_DISPLAY;
- TACTL &= ~(TAIFG);
+{
+	flag = LED_DISPLAY;
+	TACTL &= ~(TAIFG);
     _BIC_SR_IRQ(LPM3_bits);
 }
 
@@ -229,11 +226,11 @@ __interrupt void LED_timer (void)
 __interrupt void debouncing_timer(void)
 {
 
-  flag = DEBOUNCING_PROCEED;
-  ///BTN_IES ^= BTN;
-  //TBCCTL0 &= ~(CCIFG);
-  TBCTL &= ~(TBIFG);
-  _BIC_SR_IRQ(LPM3_bits);
+		flag = DEBOUNCING_PROCEED;
+		///BTN_IES ^= BTN;
+		//TBCCTL0 &= ~(CCIFG);
+		TBCTL &= ~(TBIFG);
+		_BIC_SR_IRQ(LPM3_bits);
 
 
 }
@@ -241,6 +238,26 @@ __interrupt void debouncing_timer(void)
 #pragma vector=PORT2_VECTOR
 __interrupt void Port2ISR (void)
 {
- flag = C
+	flag = CONTROL_BUTTON_PRESSED;
+	BTN_IE &= ~BTN;
+	BTN_IFG &= ~BTN;
+	 _BIC_SR_IRQ(LPM3_bits); // Budzimy sie
+
+//    if(BTN & BTN_IFG)
+//    {
+//    	if(flags & RESET_OT_WSEGO)
+//    	{
+//    	  flags &= ~( RESET_OT_WSEGO);
+//		  flags |= OPIAT_W_STROJU;
+//		  BTN_IE &= ~BTN;
+//		  BTN_IFG &= ~BTN;
+//    	}
+//    	else{
+//        flags |= CONTROL_BUTTON_CHANGED;
+//        BTN_IE &= ~BTN;
+//        BTN_IFG &= ~BTN;
+//    	}
+//         _BIC_SR_IRQ(LPM3_bits); // Budzimy sie
+//    }
 
 }
